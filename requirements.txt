@@ -1,0 +1,129 @@
+
+# Requisitos para configurar Prisma con PostgreSQL
+
+## Requisitos previos
+- Node.js (v14 o superior)
+- npm o yarn
+- PostgreSQL instalado y en ejecución
+
+## Pasos para configurar Prisma
+
+1. Instalar dependencias de Prisma:
+```
+npm install prisma @prisma/client
+```
+
+2. Configurar Prisma con el siguiente comando:
+```
+npx prisma init
+```
+
+3. Configurar la URL de la base de datos en el archivo .env:
+```
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/nombre_bd?schema=public"
+```
+
+4. Definir el esquema en el archivo prisma/schema.prisma:
+```prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Animal {
+  id           String          @id @default(uuid())
+  name         String
+  code         String          @unique
+  breed        String
+  gender       String
+  birthDate    DateTime
+  status       String
+  motherId     String?
+  fatherId     String?
+  observations String?
+  imageUrl     String?
+  mother       Animal?         @relation("MotherChildren", fields: [motherId], references: [id])
+  father       Animal?         @relation("FatherChildren", fields: [fatherId], references: [id])
+  children     Animal[]        @relation("MotherChildren")
+  sired        Animal[]        @relation("FatherChildren")
+  births       Birth[]
+  milkRecords  MilkProduction[]
+
+  @@map("animals")
+}
+
+model Birth {
+  id          String   @id @default(uuid())
+  animalId    String
+  birthNumber Int
+  date        DateTime
+  motherWeight Float
+  calfWeight   Float
+  calfGender   String
+  calfId      String?
+  fatherId    String?
+  animal      Animal   @relation(fields: [animalId], references: [id])
+  
+  milkProductions MilkProduction[]
+
+  @@map("births")
+}
+
+model MilkProduction {
+  id       String   @id @default(uuid())
+  animalId String
+  date     DateTime
+  liters   Float
+  birthId  String?
+  animal   Animal   @relation(fields: [animalId], references: [id])
+  birth    Birth?   @relation(fields: [birthId], references: [id])
+
+  @@map("milk_productions")
+}
+```
+
+5. Crear las migraciones iniciales:
+```
+npx prisma migrate dev --name init
+```
+
+6. Generar el cliente Prisma:
+```
+npx prisma generate
+```
+
+## Integración con la aplicación
+
+1. Crear un cliente Prisma en src/lib/prisma.ts:
+```typescript
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma = globalForPrisma.prisma || new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export default prisma;
+```
+
+2. Actualizar los archivos de API para usar Prisma en lugar de datos simulados.
+
+3. Para desarrollo, puedes usar Prisma Studio para gestionar los datos:
+```
+npx prisma studio
+```
+
+## Comandos útiles de Prisma
+
+- Visualizar la base de datos: `npx prisma studio`
+- Actualizar el schema tras cambios: `npx prisma migrate dev`
+- Reset de la base de datos: `npx prisma migrate reset`
+- Verificar el estado: `npx prisma validate`
