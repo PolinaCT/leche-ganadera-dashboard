@@ -410,7 +410,7 @@ const Reports = () => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="month" 
-                          tick={{ angle: -45, textAnchor: 'end' }}
+                          tick={{ textAnchor: 'end', dy: 10 }}
                           height={60}
                         />
                         <YAxis />

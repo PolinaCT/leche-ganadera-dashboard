@@ -315,7 +315,7 @@ const MilkProduction = () => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis 
                           dataKey="animal" 
-                          tick={{ angle: -45, textAnchor: 'end' }}
+                          tick={{ textAnchor: 'end', dy: 10 }}
                           height={80}
                         />
                         <YAxis 
