@@ -5,7 +5,7 @@ import { useFarm } from '@/context/FarmContext';
 import StatCard from '@/components/dashboard/StatCard';
 import ProductionChart from '@/components/dashboard/ProductionChart';
 import RecentBirths from '@/components/dashboard/RecentBirths';
-import { Home, ChartBar, Cow, Calendar } from 'lucide-react';
+import { Home, BarChart, Beef, Calendar } from 'lucide-react';
 
 const Index = () => {
   const { getActiveAnimalCount, getTotalBirths, getProductionStats } = useFarm();
@@ -22,7 +22,7 @@ const Index = () => {
           <StatCard 
             title="Animales Activos" 
             value={getActiveAnimalCount()}
-            icon={<Cow size={24} />}
+            icon={<Beef size={24} />}
           />
           <StatCard 
             title="Total de Partos" 
@@ -33,7 +33,7 @@ const Index = () => {
             title="Producción Diaria" 
             value={`${productionStats.daily} L`}
             description="Total de litros hoy"
-            icon={<ChartBar size={24} />}
+            icon={<BarChart size={24} />}
           />
           <StatCard 
             title="Producción Mensual" 
