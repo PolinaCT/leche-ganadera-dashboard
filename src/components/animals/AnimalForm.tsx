@@ -148,7 +148,7 @@ const AnimalForm = ({ animal, onSubmit, onCancel }: AnimalFormProps) => {
               <SelectValue placeholder="Seleccionar madre" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No especificada</SelectItem>
+              <SelectItem value="none">No especificada</SelectItem>
               {femaleAnimals.map(animal => (
                 <SelectItem key={animal.id} value={animal.id}>
                   {animal.name} ({animal.code})
@@ -168,7 +168,7 @@ const AnimalForm = ({ animal, onSubmit, onCancel }: AnimalFormProps) => {
               <SelectValue placeholder="Seleccionar padre" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No especificado</SelectItem>
+              <SelectItem value="none">No especificado</SelectItem>
               {maleAnimals.map(animal => (
                 <SelectItem key={animal.id} value={animal.id}>
                   {animal.name} ({animal.code})

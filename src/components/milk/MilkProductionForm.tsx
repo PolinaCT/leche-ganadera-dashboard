@@ -116,7 +116,7 @@ const MilkProductionForm = ({
                 <SelectValue placeholder="Seleccionar parto" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No asociar</SelectItem>
+                <SelectItem value="none">No asociar</SelectItem>
                 {animalBirths.map(birth => (
                   <SelectItem key={birth.id} value={birth.id}>
                     Parto #{birth.birthNumber} - {new Date(birth.date).toLocaleDateString('es-ES')}

@@ -173,7 +173,7 @@ const BirthForm = ({ birth, animalId, onSubmit, onCancel }: BirthFormProps) => {
               <SelectValue placeholder="Seleccionar cría" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No especificada</SelectItem>
+              <SelectItem value="none">No especificada</SelectItem>
               {possibleCalves.map(animal => (
                 <SelectItem key={animal.id} value={animal.id}>
                   {animal.name} ({animal.code})
@@ -193,7 +193,7 @@ const BirthForm = ({ birth, animalId, onSubmit, onCancel }: BirthFormProps) => {
               <SelectValue placeholder="Seleccionar padre" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No especificado</SelectItem>
+              <SelectItem value="none">No especificado</SelectItem>
               {maleAnimals.map(animal => (
                 <SelectItem key={animal.id} value={animal.id}>
                   {animal.name} ({animal.code})
