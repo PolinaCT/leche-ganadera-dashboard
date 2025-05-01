@@ -27,6 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const { login } = useAuth();
 
   const form = useForm<LoginFormValues>({
@@ -39,8 +40,12 @@ const LoginForm = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+    setLoginError(null);
     try {
       await login(data.email, data.password);
+    } catch (error) {
+      console.error('Login error:', error);
+      setLoginError(error instanceof Error ? error.message : 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +62,11 @@ const LoginForm = () => {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {loginError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm mb-4">
+                {loginError}
+              </div>
+            )}
             <FormField
               control={form.control}
               name="email"
@@ -79,6 +89,7 @@ const LoginForm = () => {
                 </FormItem>
               )}
             />
+            
             <FormField
               control={form.control}
               name="password"
