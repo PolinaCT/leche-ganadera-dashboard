@@ -20,7 +20,8 @@ const handlers = [
   // Handler for login requests
   http.post('/api/login', async ({ request }) => {
     try {
-      const data: LoginRequest = await request.json();
+      const reqData = await request.json();
+      const data = reqData as LoginRequest;
       const user = await loginUser(data.email, data.password);
       return HttpResponse.json(user, { status: 200 });
     } catch (error) {
@@ -34,7 +35,8 @@ const handlers = [
   // Handler for registration requests
   http.post('/api/register', async ({ request }) => {
     try {
-      const data: RegisterRequest = await request.json();
+      const reqData = await request.json();
+      const data = reqData as RegisterRequest;
       const user = await registerUser(data.email, data.name, data.password);
       return HttpResponse.json(user, { status: 200 });
     } catch (error) {

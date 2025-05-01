@@ -1,9 +1,32 @@
+
 import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+// Mock implementation for browser environment
+class MockPrismaClient {
+  user = {
+    findUnique: async ({ where }) => {
+      // Get users from localStorage or return null
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      return users.find(user => user.email === where.email) || null;
+    },
+    create: async ({ data }) => {
+      // Store user in localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const newUser = {
+        id: `user-${Date.now()}`,
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      return newUser;
+    }
+  }
+}
 
-export const prisma = globalForPrisma.prisma || new PrismaClient();
+// Use mock in browser, real client in Node environment
+const isBrowser = typeof window !== 'undefined';
+const prismaClient = isBrowser ? new MockPrismaClient() : new PrismaClient();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-export default prisma;
+export default prismaClient;
