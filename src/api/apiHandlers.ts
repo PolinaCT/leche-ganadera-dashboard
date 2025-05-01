@@ -1,6 +1,5 @@
 
 import { http, HttpResponse } from 'msw';
-import { setupWorker } from 'msw/browser';
 import { loginUser, registerUser } from './authApi';
 
 // Define types for our request bodies
@@ -61,15 +60,26 @@ const handlers = [
 // Initialize the service worker
 export const worker = setupWorker(...handlers);
 
+// Import setupWorker at the top level to avoid the "module is not defined" error
+import { setupWorker } from 'msw/browser';
+
 // Start the service worker
 export const startApiWorker = () => {
   // Only start in non-production environments
   if (process.env.NODE_ENV !== 'production') {
-    worker.start({
-      onUnhandledRequest: 'bypass', // To avoid logging unhandled requests
-    }).catch(error => {
-      console.error('Failed to start MSW worker:', error);
-    });
-    console.log('API Mock Service Worker started');
+    console.log('Starting MSW worker...');
+    try {
+      worker.start({
+        onUnhandledRequest: 'bypass', // To avoid logging unhandled requests
+      })
+      .then(() => {
+        console.log('API Mock Service Worker started successfully');
+      })
+      .catch(error => {
+        console.error('Failed to start MSW worker:', error);
+      });
+    } catch (error) {
+      console.error('Error setting up MSW worker:', error);
+    }
   }
 };

@@ -18,23 +18,29 @@ export const registerUser = async (email: string, name: string, password: string
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Create new user
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          name,
+          password: hashedPassword,
+          role: 'user', // Default role
+        },
+      });
 
-    // Create new user
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-        role: 'user', // Default role
-      },
-    });
+      console.log('User registered successfully:', email);
 
-    console.log('User registered successfully:', email);
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = newUser;
+      return userWithoutPassword;
+      
+    } catch (hashError) {
+      console.error('Error hashing password:', hashError);
+      throw new Error('Error al registrar el usuario');
+    }
   } catch (error) {
     console.error('Registration error:', error);
     throw error;
@@ -56,19 +62,25 @@ export const loginUser = async (email: string, password: string) => {
       throw new Error('Credenciales inválidas');
     }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    if (!isPasswordValid) {
-      console.log('Invalid password for user:', email);
-      throw new Error('Credenciales inválidas');
-    }
+    try {
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      
+      if (!isPasswordValid) {
+        console.log('Invalid password for user:', email);
+        throw new Error('Credenciales inválidas');
+      }
 
-    console.log('Login successful for user:', email);
-    
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+      console.log('Login successful for user:', email);
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+      
+    } catch (bcryptError) {
+      console.error('Error comparing passwords:', bcryptError);
+      throw new Error('Error al verificar credenciales');
+    }
   } catch (error) {
     console.error('Login error:', error);
     throw error;
