@@ -5,12 +5,15 @@ import * as bcrypt from 'bcryptjs';
 // Function to register users
 export const registerUser = async (email: string, name: string, password: string) => {
   try {
+    console.log('Registering user:', email);
+    
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
+      console.log('User already exists:', email);
       throw new Error('El correo electrónico ya está en uso');
     }
 
@@ -27,6 +30,8 @@ export const registerUser = async (email: string, name: string, password: string
       },
     });
 
+    console.log('User registered successfully:', email);
+
     // Return user without password
     const { password: _, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
@@ -39,6 +44,8 @@ export const registerUser = async (email: string, name: string, password: string
 // Function for login
 export const loginUser = async (email: string, password: string) => {
   try {
+    console.log('Attempting login for:', email);
+    
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },

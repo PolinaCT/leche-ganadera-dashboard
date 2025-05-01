@@ -21,11 +21,12 @@ const handlers = [
   http.post('/api/login', async ({ request }) => {
     try {
       console.log('Processing login request');
-      const reqData = await request.json();
-      const data = reqData as LoginRequest;
+      const data = await request.json() as LoginRequest;
       console.log('Login attempt for email:', data.email);
+      
       const user = await loginUser(data.email, data.password);
       console.log('Login successful:', user);
+      
       return HttpResponse.json(user, { status: 200 });
     } catch (error) {
       console.error('Login handler error:', error);
@@ -40,11 +41,12 @@ const handlers = [
   http.post('/api/register', async ({ request }) => {
     try {
       console.log('Processing registration request');
-      const reqData = await request.json();
-      const data = reqData as RegisterRequest;
+      const data = await request.json() as RegisterRequest;
       console.log('Registration attempt for email:', data.email);
+      
       const user = await registerUser(data.email, data.name, data.password);
       console.log('Registration successful:', user);
+      
       return HttpResponse.json(user, { status: 200 });
     } catch (error) {
       console.error('Registration handler error:', error);
@@ -61,7 +63,7 @@ export const worker = setupWorker(...handlers);
 
 // Start the service worker
 export const startApiWorker = () => {
-  // Don't actually start in production mode
+  // Only start in non-production environments
   if (process.env.NODE_ENV !== 'production') {
     worker.start({
       onUnhandledRequest: 'bypass', // To avoid logging unhandled requests

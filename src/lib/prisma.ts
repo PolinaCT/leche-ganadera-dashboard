@@ -1,7 +1,7 @@
 
-import { PrismaClient } from '@prisma/client';
+// This is a browser-friendly mock implementation of Prisma client
+// Since Prisma is a Node.js library, we need to create a mock for browser use
 
-// Define the User type for our mock implementation
 interface User {
   id: string;
   email: string;
@@ -12,31 +12,40 @@ interface User {
   updatedAt: Date;
 }
 
-// Mock implementation for browser environment
+// Mock PrismaClient for browser environments
 class MockPrismaClient {
   user = {
-    findUnique: async ({ where }: { where: { email?: string } }) => {
+    findUnique: async ({ where }: { where: { email?: string } }): Promise<User | null> => {
       try {
-        // Get users from localStorage or return null
-        const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+        // Get users from localStorage
+        const usersJson = localStorage.getItem('users');
+        if (!usersJson) return null;
+        
+        const users: User[] = JSON.parse(usersJson);
         return users.find(user => user.email === where.email) || null;
       } catch (error) {
         console.error('Error finding user:', error);
         return null;
       }
     },
-    create: async ({ data }: { data: { email: string, name: string, password: string, role: string } }) => {
+    create: async ({ data }: { data: Omit<User, 'id' | 'createdAt' | 'updatedAt'> }): Promise<User> => {
       try {
-        // Store user in localStorage
-        const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+        // Get existing users or initialize empty array
+        const usersJson = localStorage.getItem('users');
+        const users: User[] = usersJson ? JSON.parse(usersJson) : [];
+        
+        // Create new user
         const newUser: User = {
           id: `user-${Date.now()}`,
           ...data,
           createdAt: new Date(),
           updatedAt: new Date()
         };
+        
+        // Add to users array
         users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
+        
         return newUser;
       } catch (error) {
         console.error('Error creating user:', error);
@@ -46,17 +55,21 @@ class MockPrismaClient {
   }
 }
 
-// Create a demo user in localStorage for testing if it doesn't exist
+// Initialize the demo user in localStorage
 const initializeDemoUser = () => {
   try {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    // Check if we already have users in localStorage
+    const usersJson = localStorage.getItem('users');
+    const users: User[] = usersJson ? JSON.parse(usersJson) : [];
+    
+    // If no users exist, add demo user
     if (users.length === 0) {
-      // Add a demo user
-      const demoUser = {
+      const demoUser: User = {
         id: 'demo-user-1',
         email: 'admin@example.com',
         name: 'Admin User',
-        password: '$2a$10$2rlBJIxG4GHwlHAW0qQs6OWMruNHxyn.PF4pEZUJKL6EbgqKFXFi2', // hashed 'admin123'
+        // This is the hashed version of 'admin123'
+        password: '$2a$10$2rlBJIxG4GHwlHAW0qQs6OWMruNHxyn.PF4pEZUJKL6EbgqKFXFi2',
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -70,18 +83,14 @@ const initializeDemoUser = () => {
   }
 };
 
-// Use mock in browser, real client in Node environment
-const isBrowser = typeof window !== 'undefined';
-let prismaClient: PrismaClient | MockPrismaClient;
+// Create and export our mock client
+const prismaClient = new MockPrismaClient();
 
-if (isBrowser) {
-  prismaClient = new MockPrismaClient();
-  // Initialize demo user
+// Initialize demo user when this module is imported
+// We need to check if we're in a browser environment first
+if (typeof window !== 'undefined') {
   initializeDemoUser();
   console.log('Using mock Prisma client for browser environment');
-} else {
-  prismaClient = new PrismaClient();
-  console.log('Using real Prisma client for Node environment');
 }
 
-export default prismaClient as any;
+export default prismaClient;
