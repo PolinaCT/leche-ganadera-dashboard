@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FarmProvider } from "./context/FarmContext";
+import { AuthProvider } from "./context/AuthContext";
 
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -13,27 +14,34 @@ import AnimalDetail from "./pages/AnimalDetail";
 import Births from "./pages/Births";
 import MilkProduction from "./pages/MilkProduction";
 import Reports from "./pages/Reports";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <FarmProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/inventario" element={<Inventory />} />
-            <Route path="/inventario/:id" element={<AnimalDetail />} />
-            <Route path="/partos" element={<Births />} />
-            <Route path="/produccion" element={<MilkProduction />} />
-            <Route path="/reportes" element={<Reports />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </FarmProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <FarmProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/registro" element={<Register />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/inventario" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
+              <Route path="/inventario/:id" element={<ProtectedRoute><AnimalDetail /></ProtectedRoute>} />
+              <Route path="/partos" element={<ProtectedRoute><Births /></ProtectedRoute>} />
+              <Route path="/produccion" element={<ProtectedRoute><MilkProduction /></ProtectedRoute>} />
+              <Route path="/reportes" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </FarmProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

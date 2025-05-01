@@ -2,6 +2,7 @@
 import { Bell, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import UserMenu from '@/components/layout/UserMenu';
 
 const Navbar = () => {
   return (
@@ -20,11 +21,8 @@ const Navbar = () => {
         <Button variant="ghost" size="icon">
           <Bell className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-3 ml-4">
-          <div className="h-8 w-8 rounded-full bg-farm-blue flex items-center justify-center text-white font-medium">
-            AG
-          </div>
-          <div className="text-sm font-medium">Admin</div>
+        <div className="flex items-center ml-4">
+          <UserMenu />
         </div>
       </div>
     </div>

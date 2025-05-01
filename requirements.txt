@@ -37,6 +37,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
 model Animal {
   id           String          @id @default(uuid())
   name         String
@@ -127,3 +139,55 @@ npx prisma studio
 - Actualizar el schema tras cambios: `npx prisma migrate dev`
 - Reset de la base de datos: `npx prisma migrate reset`
 - Verificar el estado: `npx prisma validate`
+
+## Usuario de prueba inicial
+
+Para crear un usuario de prueba automáticamente durante la migración inicial, crea un archivo seed.ts en el directorio prisma:
+
+```typescript
+// prisma/seed.ts
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  // Crear usuario por defecto
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      email: 'admin@example.com',
+      name: 'Administrador',
+      password: hashedPassword,
+      role: 'admin',
+    },
+  });
+  
+  console.log({ admin });
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+```
+
+Y añade esto a tu package.json:
+```
+"prisma": {
+  "seed": "ts-node prisma/seed.ts"
+}
+```
+
+Luego ejecuta:
+```
+npm install bcryptjs @types/bcryptjs ts-node
+npx prisma db seed
+```
