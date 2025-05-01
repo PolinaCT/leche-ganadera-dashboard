@@ -1,39 +1,34 @@
 
-import { setupWorker, rest } from 'msw';
+import { http, HttpResponse } from 'msw';
+import { setupWorker } from 'msw/browser';
 import { loginUser, registerUser } from './authApi';
 
 // This sets up a service worker to intercept API requests
 const handlers = [
   // Handler for login requests
-  rest.post('/api/login', async (req, res, ctx) => {
+  http.post('/api/login', async ({ request }) => {
     try {
-      const { email, password } = await req.json();
+      const { email, password } = await request.json();
       const user = await loginUser(email, password);
-      return res(
-        ctx.status(200),
-        ctx.json(user)
-      );
+      return HttpResponse.json(user, { status: 200 });
     } catch (error) {
-      return res(
-        ctx.status(400),
-        ctx.json({ message: error instanceof Error ? error.message : 'Error al iniciar sesión' })
+      return HttpResponse.json(
+        { message: error instanceof Error ? error.message : 'Error al iniciar sesión' },
+        { status: 400 }
       );
     }
   }),
   
   // Handler for registration requests
-  rest.post('/api/register', async (req, res, ctx) => {
+  http.post('/api/register', async ({ request }) => {
     try {
-      const { email, name, password } = await req.json();
+      const { email, name, password } = await request.json();
       const user = await registerUser(email, name, password);
-      return res(
-        ctx.status(200),
-        ctx.json(user)
-      );
+      return HttpResponse.json(user, { status: 200 });
     } catch (error) {
-      return res(
-        ctx.status(400),
-        ctx.json({ message: error instanceof Error ? error.message : 'Error al registrar usuario' })
+      return HttpResponse.json(
+        { message: error instanceof Error ? error.message : 'Error al registrar usuario' },
+        { status: 400 }
       );
     }
   }),
