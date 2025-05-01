@@ -3,13 +3,25 @@ import { http, HttpResponse } from 'msw';
 import { setupWorker } from 'msw/browser';
 import { loginUser, registerUser } from './authApi';
 
+// Define types for our request bodies
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequest {
+  email: string;
+  name: string;
+  password: string;
+}
+
 // This sets up a service worker to intercept API requests
 const handlers = [
   // Handler for login requests
   http.post('/api/login', async ({ request }) => {
     try {
-      const { email, password } = await request.json();
-      const user = await loginUser(email, password);
+      const data: LoginRequest = await request.json();
+      const user = await loginUser(data.email, data.password);
       return HttpResponse.json(user, { status: 200 });
     } catch (error) {
       return HttpResponse.json(
@@ -22,8 +34,8 @@ const handlers = [
   // Handler for registration requests
   http.post('/api/register', async ({ request }) => {
     try {
-      const { email, name, password } = await request.json();
-      const user = await registerUser(email, name, password);
+      const data: RegisterRequest = await request.json();
+      const user = await registerUser(data.email, data.name, data.password);
       return HttpResponse.json(user, { status: 200 });
     } catch (error) {
       return HttpResponse.json(
