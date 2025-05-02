@@ -69,20 +69,21 @@ const initializeDemoUser = () => {
     console.log('Initializing demo user...');
     
     // Check if we already have users in localStorage
-    const usersJson = localStorage.getItem('users');
     let users: User[] = [];
     
-    if (usersJson) {
-      try {
+    try {
+      const usersJson = localStorage.getItem('users');
+      if (usersJson) {
         users = JSON.parse(usersJson);
-      } catch (e) {
-        console.error('Error parsing users from localStorage:', e);
-        users = [];
+        console.log('Found existing users in localStorage:', users.length);
       }
+    } catch (e) {
+      console.error('Error parsing users from localStorage, resetting:', e);
+      localStorage.removeItem('users');
     }
     
     // If no users exist or if we couldn't parse the JSON, add demo user
-    if (users.length === 0) {
+    if (!users.length) {
       const demoUser: User = {
         id: 'demo-user-1',
         email: 'admin@example.com',
@@ -93,11 +94,9 @@ const initializeDemoUser = () => {
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      users.push(demoUser);
+      users = [demoUser];
       localStorage.setItem('users', JSON.stringify(users));
-      console.log('Demo user created successfully');
-    } else {
-      console.log('Users already exist in localStorage:', users.length);
+      console.log('Demo user created successfully:', demoUser);
     }
   } catch (error) {
     console.error('Error initializing demo user:', error);
@@ -110,7 +109,7 @@ const prismaClient = new MockPrismaClient();
 // Initialize demo user when this module is imported
 // We need to check if we're in a browser environment first
 if (typeof window !== 'undefined') {
-  console.log('Running in browser environment');
+  console.log('Running in browser environment, initializing demo user');
   initializeDemoUser();
 }
 

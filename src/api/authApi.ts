@@ -49,9 +49,9 @@ export const registerUser = async (email: string, name: string, password: string
 
 // Function for login
 export const loginUser = async (email: string, password: string) => {
+  console.log('Attempting login for:', email);
+  
   try {
-    console.log('Attempting login for:', email);
-    
     // Find user
     const user = await prisma.user.findUnique({
       where: { email },
@@ -62,27 +62,28 @@ export const loginUser = async (email: string, password: string) => {
       throw new Error('Credenciales inválidas');
     }
 
-    try {
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      
-      if (!isPasswordValid) {
-        console.log('Invalid password for user:', email);
-        throw new Error('Credenciales inválidas');
-      }
-
-      console.log('Login successful for user:', email);
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-      
-    } catch (bcryptError) {
-      console.error('Error comparing passwords:', bcryptError);
-      throw new Error('Error al verificar credenciales');
+    console.log('User found, verifying password');
+    
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      console.log('Invalid password for user:', email);
+      throw new Error('Credenciales inválidas');
     }
+
+    console.log('Login successful for user:', email);
+    
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+      
   } catch (error) {
     console.error('Login error:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    } else {
+      throw new Error('Error al verificar credenciales');
+    }
   }
 };
