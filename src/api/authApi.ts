@@ -1,6 +1,5 @@
 
 import prisma from '@/lib/prisma';
-import * as bcrypt from 'bcryptjs';
 
 // Function to register users
 export const registerUser = async (email: string, name: string, password: string) => {
@@ -17,30 +16,22 @@ export const registerUser = async (email: string, name: string, password: string
       throw new Error('El correo electrónico ya está en uso');
     }
 
-    // Hash password
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
-      // Create new user
-      const newUser = await prisma.user.create({
-        data: {
-          email,
-          name,
-          password: hashedPassword,
-          role: 'user', // Default role
-        },
-      });
+    // Create new user with plaintext password for demo
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        name,
+        password: password, // Store plaintext for demo
+        role: 'user', // Default role
+      },
+    });
 
-      console.log('User registered successfully:', email);
+    console.log('User registered successfully:', email);
 
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = newUser;
+    return userWithoutPassword;
       
-    } catch (hashError) {
-      console.error('Error hashing password:', hashError);
-      throw new Error('Error al registrar el usuario');
-    }
   } catch (error) {
     console.error('Registration error:', error);
     throw error;
@@ -64,8 +55,9 @@ export const loginUser = async (email: string, password: string) => {
 
     console.log('User found, verifying password');
     
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // For demo purposes, we're doing a direct password comparison
+    const isPasswordValid = user.password === password;
+    console.log('Password validation result:', isPasswordValid);
     
     if (!isPasswordValid) {
       console.log('Invalid password for user:', email);

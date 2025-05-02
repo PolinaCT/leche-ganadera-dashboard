@@ -88,15 +88,15 @@ const initializeDemoUser = () => {
         id: 'demo-user-1',
         email: 'admin@example.com',
         name: 'Admin User',
-        // This is the hashed version of 'admin123'
-        password: '$2a$10$2rlBJIxG4GHwlHAW0qQs6OWMruNHxyn.PF4pEZUJKL6EbgqKFXFi2',
+        // This is a plaintext password for demo purposes as bcryptjs has issues in the browser
+        password: 'admin123',
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()
       };
       users = [demoUser];
       localStorage.setItem('users', JSON.stringify(users));
-      console.log('Demo user created successfully:', demoUser);
+      console.log('Demo user created successfully:', demoUser.email);
     }
   } catch (error) {
     console.error('Error initializing demo user:', error);
