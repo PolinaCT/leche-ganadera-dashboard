@@ -75,7 +75,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Credenciales inválidas');
       }
       
-      // For demo purposes, we're doing a direct password comparison since bcrypt has issues
+      // Simple direct password comparison for demo
+      console.log('Comparing passwords:', password, user.password);
       const isPasswordValid = user.password === password;
       console.log('Password validation result:', isPasswordValid);
       

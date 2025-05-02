@@ -88,7 +88,6 @@ const initializeDemoUser = () => {
         id: 'demo-user-1',
         email: 'admin@example.com',
         name: 'Admin User',
-        // This is a plaintext password for demo purposes as bcryptjs has issues in the browser
         password: 'admin123',
         role: 'admin',
         createdAt: new Date(),

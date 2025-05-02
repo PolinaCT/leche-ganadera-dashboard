@@ -55,7 +55,7 @@ export const loginUser = async (email: string, password: string) => {
 
     console.log('User found, verifying password');
     
-    // For demo purposes, we're doing a direct password comparison
+    // Simple direct password comparison for demo
     const isPasswordValid = user.password === password;
     console.log('Password validation result:', isPasswordValid);
     

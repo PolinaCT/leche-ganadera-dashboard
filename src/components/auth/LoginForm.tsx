@@ -54,13 +54,18 @@ const LoginForm = () => {
   const loginAsDemo = async () => {
     setIsLoading(true);
     setLoginError(null);
+    
+    // Demo credentials
+    const demoEmail = 'admin@example.com';
+    const demoPassword = 'admin123';
+    
     try {
-      // Pre-fill the form with demo credentials
-      form.setValue('email', 'admin@example.com');
-      form.setValue('password', 'admin123');
+      // Pre-fill the form with demo credentials for visual feedback
+      form.setValue('email', demoEmail);
+      form.setValue('password', demoPassword);
       
       // Login with demo credentials
-      await login('admin@example.com', 'admin123');
+      await login(demoEmail, demoPassword);
     } catch (error) {
       console.error('Demo login error:', error);
       setLoginError(error instanceof Error ? error.message : 'Error al iniciar sesión con usuario de prueba');
