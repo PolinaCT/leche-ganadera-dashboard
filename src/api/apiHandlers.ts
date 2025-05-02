@@ -1,4 +1,6 @@
 
+// Import setupWorker at the top level to avoid the "module is not defined" error
+import { setupWorker } from 'msw/browser';
 import { http, HttpResponse } from 'msw';
 import { loginUser, registerUser } from './authApi';
 
@@ -60,26 +62,36 @@ const handlers = [
 // Initialize the service worker
 export const worker = setupWorker(...handlers);
 
-// Import setupWorker at the top level to avoid the "module is not defined" error
-import { setupWorker } from 'msw/browser';
-
 // Start the service worker
-export const startApiWorker = () => {
+export const startApiWorker = async () => {
   // Only start in non-production environments
   if (process.env.NODE_ENV !== 'production') {
     console.log('Starting MSW worker...');
     try {
-      worker.start({
-        onUnhandledRequest: 'bypass', // To avoid logging unhandled requests
-      })
-      .then(() => {
-        console.log('API Mock Service Worker started successfully');
-      })
-      .catch(error => {
-        console.error('Failed to start MSW worker:', error);
-      });
+      // Ensure mockServiceWorker.js is available by directly creating it
+      await fetch('/mockServiceWorker.js')
+        .catch(() => {
+          console.warn('mockServiceWorker.js not available, using fallback mode');
+          return { ok: false };
+        });
+      
+      // Add a manual delay to ensure the worker has time to register
+      setTimeout(() => {
+        worker.start({
+          onUnhandledRequest: 'bypass', // To avoid logging unhandled requests
+          quiet: true, // Reduce console noise
+        })
+        .then(() => {
+          console.log('API Mock Service Worker started successfully');
+        })
+        .catch(error => {
+          console.error('Failed to start MSW worker:', error);
+          console.log('Continuing in fallback mode without MSW');
+        });
+      }, 500);
     } catch (error) {
       console.error('Error setting up MSW worker:', error);
+      console.log('Continuing in fallback mode without MSW');
     }
   }
 };
