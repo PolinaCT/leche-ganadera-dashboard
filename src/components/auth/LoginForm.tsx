@@ -51,6 +51,24 @@ const LoginForm = () => {
     }
   };
 
+  const loginAsDemo = async () => {
+    setIsLoading(true);
+    setLoginError(null);
+    try {
+      // Pre-fill the form with demo credentials
+      form.setValue('email', 'admin@example.com');
+      form.setValue('password', 'admin123');
+      
+      // Login with demo credentials
+      await login('admin@example.com', 'admin123');
+    } catch (error) {
+      console.error('Demo login error:', error);
+      setLoginError(error instanceof Error ? error.message : 'Error al iniciar sesión con usuario de prueba');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
@@ -122,6 +140,18 @@ const LoginForm = () => {
             </Button>
           </form>
         </Form>
+        
+        <div className="mt-4">
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            onClick={loginAsDemo}
+            disabled={isLoading}
+          >
+            Iniciar con usuario de prueba
+          </Button>
+        </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
         <div className="text-center text-sm">
