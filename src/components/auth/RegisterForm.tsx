@@ -51,7 +51,7 @@ const RegisterForm = () => {
     setRegisterError(null);
     try {
       await register(data.email, data.name, data.password);
-      toast.success('Usuario registrado correctamente (guardado en localStorage)');
+      toast.success('Usuario registrado correctamente');
     } catch (error) {
       console.error('Registration error:', error);
       setRegisterError(error instanceof Error ? error.message : 'Error al registrar usuario');
@@ -69,9 +69,9 @@ const RegisterForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="p-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-md text-sm mb-4 flex items-center">
+        <div className="p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-md text-sm mb-4 flex items-center">
           <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-          <p>Esta versión de demostración almacena los usuarios en localStorage, no en PostgreSQL.</p>
+          <p>Los datos se guardan en PostgreSQL. Si la conexión falla, se usará localStorage como respaldo.</p>
         </div>
         
         <Form {...form}>

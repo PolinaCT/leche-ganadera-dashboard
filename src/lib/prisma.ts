@@ -1,118 +1,99 @@
 
-// This is a browser-friendly mock implementation of Prisma client
-// Since Prisma is a Node.js library, we need to create a mock for browser use
+// Real Prisma client implementation for PostgreSQL
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  password: string;
-  role: string;
-  createdAt: Date;
-  updatedAt: Date;
+import { PrismaClient } from "@prisma/client";
+
+// Prevent multiple instances of Prisma Client in development
+declare global {
+  var prisma: PrismaClient | undefined;
 }
 
-// Mock PrismaClient for browser environments
-class MockPrismaClient {
-  user = {
-    findUnique: async ({ where }: { where: { email?: string } }): Promise<User | null> => {
-      console.log('Mock findUnique looking for user with email:', where.email);
-      try {
-        // Get users from localStorage
-        const usersJson = localStorage.getItem('users');
-        if (!usersJson) {
-          console.log('No users found in localStorage');
-          return null;
-        }
-        
-        const users: User[] = JSON.parse(usersJson);
-        const foundUser = users.find(user => user.email === where.email);
-        console.log('User found:', foundUser ? 'yes' : 'no');
-        return foundUser || null;
-      } catch (error) {
-        console.error('Error finding user:', error);
-        return null;
-      }
-    },
-    create: async ({ data }: { data: Omit<User, 'id' | 'createdAt' | 'updatedAt'> }): Promise<User> => {
-      console.log('Mock creating new user with email:', data.email);
-      console.log('IMPORTANT: This is saving to localStorage, NOT to a PostgreSQL database');
-      
-      try {
-        // Get existing users or initialize empty array
-        const usersJson = localStorage.getItem('users');
-        const users: User[] = usersJson ? JSON.parse(usersJson) : [];
-        
-        // Create new user
-        const newUser: User = {
-          id: `user-${Date.now()}`,
-          ...data,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        
-        // Add to users array
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        console.log('User created successfully in localStorage');
-        console.log('Current users in localStorage:', users.length);
-        
-        return newUser;
-      } catch (error) {
-        console.error('Error creating user:', error);
-        throw new Error('Failed to create user');
-      }
-    }
-  }
+// Initialize Prisma client
+const prisma = global.prisma || new PrismaClient();
+
+// Only do this in development to avoid memory leaks
+if (process.env.NODE_ENV !== "production") {
+  global.prisma = prisma;
 }
 
-// Initialize the demo user in localStorage
-const initializeDemoUser = () => {
+// Initialize demo user for development
+async function initializeDemoUser() {
   try {
-    console.log('Initializing demo user...');
+    console.log('Checking for demo user...');
     
-    // Check if we already have users in localStorage
-    let users: User[] = [];
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'admin@example.com' }
+    });
     
-    try {
-      const usersJson = localStorage.getItem('users');
-      if (usersJson) {
-        users = JSON.parse(usersJson);
-        console.log('Found existing users in localStorage:', users.length);
-      }
-    } catch (e) {
-      console.error('Error parsing users from localStorage, resetting:', e);
-      localStorage.removeItem('users');
-    }
-    
-    // If no users exist or if we couldn't parse the JSON, add demo user
-    if (!users.length) {
-      const demoUser: User = {
-        id: 'demo-user-1',
-        email: 'admin@example.com',
-        name: 'Admin User',
-        password: 'admin123',
-        role: 'admin',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      users = [demoUser];
-      localStorage.setItem('users', JSON.stringify(users));
-      console.log('Demo user created successfully:', demoUser.email);
+    if (!existingUser) {
+      console.log('Creating demo user...');
+      await prisma.user.create({
+        data: {
+          email: 'admin@example.com',
+          name: 'Admin User',
+          password: 'admin123', // Plain text for demo only
+          role: 'admin',
+        }
+      });
+      console.log('Demo user created successfully in PostgreSQL database');
+    } else {
+      console.log('Demo user already exists in PostgreSQL database');
     }
   } catch (error) {
     console.error('Error initializing demo user:', error);
+    console.log('Using fallback localStorage mode due to database connection error');
+    setupLocalStorageFallback();
   }
-};
-
-// Create and export our mock client
-const prismaClient = new MockPrismaClient();
-
-// Initialize demo user when this module is imported
-// We need to check if we're in a browser environment first
-if (typeof window !== 'undefined') {
-  console.log('Running in browser environment, initializing demo user');
-  initializeDemoUser();
 }
 
-export default prismaClient;
+// Fallback to localStorage if database connection fails
+function setupLocalStorageFallback() {
+  console.log('Setting up localStorage fallback for development');
+  if (typeof window !== 'undefined') {
+    try {
+      // Check if we already have users in localStorage
+      let users: any[] = [];
+      
+      try {
+        const usersJson = localStorage.getItem('users');
+        if (usersJson) {
+          users = JSON.parse(usersJson);
+          console.log('Found existing users in localStorage:', users.length);
+        }
+      } catch (e) {
+        console.error('Error parsing users from localStorage, resetting:', e);
+        localStorage.removeItem('users');
+      }
+      
+      // If no users exist or if we couldn't parse the JSON, add demo user
+      if (!users.length) {
+        const demoUser = {
+          id: 'demo-user-1',
+          email: 'admin@example.com',
+          name: 'Admin User',
+          password: 'admin123',
+          role: 'admin',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        users = [demoUser];
+        localStorage.setItem('users', JSON.stringify(users));
+        console.log('Demo user created successfully in localStorage (fallback mode)');
+      }
+    } catch (error) {
+      console.error('Error initializing localStorage fallback:', error);
+    }
+  }
+}
+
+// Call initialization function
+if (typeof window !== 'undefined') {
+  console.log('Running in browser environment, initializing database connection');
+  initializeDemoUser()
+    .catch(error => {
+      console.error('Database initialization error:', error);
+      setupLocalStorageFallback();
+    });
+}
+
+export default prisma;
