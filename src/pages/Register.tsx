@@ -8,6 +8,7 @@ const Register = () => {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-farm-blue">LecheGanadera</h1>
           <p className="mt-2 text-gray-600">Sistema de gestión de ganado lechero</p>
+          <p className="mt-1 text-amber-600 text-sm">Versión de demostración</p>
         </div>
         <RegisterForm />
       </div>

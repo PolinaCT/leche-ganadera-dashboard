@@ -16,7 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Lock, User, UserRound } from 'lucide-react';
+import { Lock, User, UserRound, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
@@ -32,6 +33,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
   const { register } = useAuth();
 
   const form = useForm<RegisterFormValues>({
@@ -46,8 +48,13 @@ const RegisterForm = () => {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
+    setRegisterError(null);
     try {
       await register(data.email, data.name, data.password);
+      toast.success('Usuario registrado correctamente (guardado en localStorage)');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setRegisterError(error instanceof Error ? error.message : 'Error al registrar usuario');
     } finally {
       setIsLoading(false);
     }
@@ -62,8 +69,18 @@ const RegisterForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="p-3 bg-amber-50 border border-amber-200 text-amber-700 rounded-md text-sm mb-4 flex items-center">
+          <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+          <p>Esta versión de demostración almacena los usuarios en localStorage, no en PostgreSQL.</p>
+        </div>
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {registerError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+                {registerError}
+              </div>
+            )}
             <FormField
               control={form.control}
               name="name"

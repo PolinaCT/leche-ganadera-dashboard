@@ -27,6 +27,7 @@ export const registerUser = async (email: string, name: string, password: string
     });
 
     console.log('User registered successfully:', email);
+    console.log('Note: User is stored in localStorage, not in PostgreSQL database');
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = newUser;

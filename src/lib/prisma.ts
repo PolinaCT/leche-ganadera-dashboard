@@ -36,6 +36,8 @@ class MockPrismaClient {
     },
     create: async ({ data }: { data: Omit<User, 'id' | 'createdAt' | 'updatedAt'> }): Promise<User> => {
       console.log('Mock creating new user with email:', data.email);
+      console.log('IMPORTANT: This is saving to localStorage, NOT to a PostgreSQL database');
+      
       try {
         // Get existing users or initialize empty array
         const usersJson = localStorage.getItem('users');
@@ -52,7 +54,8 @@ class MockPrismaClient {
         // Add to users array
         users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
-        console.log('User created successfully');
+        console.log('User created successfully in localStorage');
+        console.log('Current users in localStorage:', users.length);
         
         return newUser;
       } catch (error) {
