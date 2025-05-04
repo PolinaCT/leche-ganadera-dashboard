@@ -12,6 +12,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 interface MilkProductionFormProps {
   production?: MilkProduction;
@@ -42,6 +43,13 @@ const MilkProductionForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Submitting milk production form with data:', {
+      animalId: selectedAnimalId,
+      date,
+      liters,
+      birthId: birthId || undefined,
+    });
+    
     const productionData = {
       animalId: selectedAnimalId,
       date,
@@ -49,13 +57,23 @@ const MilkProductionForm = ({
       birthId: birthId || undefined,
     };
     
-    if (production) {
-      updateMilkProduction({ ...productionData, id: production.id });
-    } else {
-      addMilkProduction(productionData);
+    try {
+      if (production) {
+        console.log('Updating existing milk production record:', production.id);
+        updateMilkProduction({ ...productionData, id: production.id });
+        toast.success('Registro de producción actualizado correctamente');
+      } else {
+        console.log('Adding new milk production record');
+        addMilkProduction(productionData);
+        toast.success('Producción de leche registrada correctamente');
+      }
+      
+      console.log('Form submission successful, calling onSubmit callback');
+      onSubmit();
+    } catch (error) {
+      console.error('Error saving milk production:', error);
+      toast.error('Error al guardar los datos de producción');
     }
-    
-    onSubmit();
   };
   
   return (
