@@ -87,7 +87,7 @@ class BrowserPrismaClient {
       update, 
       create 
     }: { 
-      where: { email?: string }, 
+      where: { email: string }, 
       update: Partial<User>,
       create: Omit<User, 'id' | 'createdAt' | 'updatedAt'>
     }) => {
@@ -95,36 +95,32 @@ class BrowserPrismaClient {
       const usersJson = localStorage.getItem('users');
       const users = usersJson ? JSON.parse(usersJson) as User[] : [];
       
-      if (where.email) {
-        const existingUserIndex = users.findIndex(user => user.email === where.email);
-        
-        if (existingUserIndex !== -1) {
-          // Update existing user
-          const updatedUser = {
-            ...users[existingUserIndex],
-            ...update,
-            updatedAt: new Date()
-          };
-          
-          users[existingUserIndex] = updatedUser;
-          localStorage.setItem('users', JSON.stringify(users));
-          return updatedUser;
-        } else {
-          // Create new user
-          const newUser: User = {
-            ...create,
-            id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
-          
-          users.push(newUser);
-          localStorage.setItem('users', JSON.stringify(users));
-          return newUser;
-        }
-      }
+      const existingUserIndex = users.findIndex(user => user.email === where.email);
       
-      throw new Error('Email is required for upsert operation');
+      if (existingUserIndex !== -1) {
+        // Update existing user
+        const updatedUser = {
+          ...users[existingUserIndex],
+          ...update,
+          updatedAt: new Date()
+        };
+        
+        users[existingUserIndex] = updatedUser;
+        localStorage.setItem('users', JSON.stringify(users));
+        return updatedUser;
+      } else {
+        // Create new user
+        const newUser: User = {
+          ...create,
+          id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        return newUser;
+      }
     }
   };
 
