@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import prisma from '@/lib/prisma';
 
 interface User {
   id: string;
@@ -41,54 +40,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       console.log('Login attempt with:', email);
       
-      try {
-        // Primero intentamos usar la API ficticia a través de MSW
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          console.log('Successfully logged in via API');
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-          toast.success('Inicio de sesión exitoso');
-          navigate('/');
-          return;
-        } 
-        
-        // If API doesn't return ok but doesn't throw, we'll fall back to direct auth
-        console.warn('API login failed with status:', response.status);
-      } catch (apiError) {
-        console.warn('API login failed, falling back to direct authentication:', apiError);
-      }
-      
-      // Fallback: authenticate directly with the mock service if API fails
-      const user = await prisma.user.findUnique({
-        where: { email },
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
-      
-      if (!user) {
-        console.log('User not found:', email);
-        throw new Error('Credenciales inválidas');
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al iniciar sesión');
       }
       
-      // Simple direct password comparison for demo
-      console.log('Comparing passwords:', password, user.password);
-      const isPasswordValid = user.password === password;
-      console.log('Password validation result:', isPasswordValid);
-      
-      if (!isPasswordValid) {
-        console.log('Invalid password for user:', email);
-        throw new Error('Credenciales inválidas');
-      }
-      
-      console.log('Successfully logged in via direct authentication');
-      const { password: _, ...userWithoutPassword } = user;
-      setUser(userWithoutPassword);
-      localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      const userData = await response.json();
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
       
       toast.success('Inicio de sesión exitoso');
       navigate('/');
@@ -105,47 +70,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
-      try {
-        // Primero intentamos usar la API ficticia a través de MSW
-        const response = await fetch('/api/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, password }),
-        });
-
-        if (response.ok) {
-          console.log('Successfully registered via API');
-          toast.success('Usuario registrado correctamente');
-          navigate('/login');
-          return;
-        }
-        
-        // If API doesn't return ok but doesn't throw, we'll fall back
-        console.warn('API registration failed with status:', response.status);
-      } catch (apiError) {
-        console.warn('API registration failed, falling back to direct registration:', apiError);
-      }
-      
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, password }),
       });
 
-      if (existingUser) {
-        throw new Error('El correo electrónico ya está en uso');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al registrar usuario');
       }
-
-      // Create new user with plaintext password for demo
-      await prisma.user.create({
-        data: {
-          email,
-          name,
-          password: password, // Store plaintext for demo
-          role: 'user', // Default role
-        },
-      });
-      
-      console.log('Successfully registered via direct registration');
 
       toast.success('Usuario registrado correctamente');
       navigate('/login');

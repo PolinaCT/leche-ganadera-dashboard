@@ -71,7 +71,7 @@ const RegisterForm = () => {
       <CardContent>
         <div className="p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-md text-sm mb-4 flex items-center">
           <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
-          <p>Los datos se guardan en PostgreSQL. Si la conexión falla, se usará localStorage como respaldo.</p>
+          <p>La aplicación está usando localStorage para almacenar datos de usuarios en el navegador.</p>
         </div>
         
         <Form {...form}>
