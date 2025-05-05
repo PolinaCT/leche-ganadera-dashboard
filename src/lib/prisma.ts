@@ -135,10 +135,12 @@ class BrowserPrismaClient {
     if (!existingUser) {
       console.log('Creating demo user...');
       await this.user.create({
-        email: 'admin@example.com',
-        name: 'Admin User',
-        password: 'admin123',
-        role: 'admin',
+        data: {  // Fixed: Wrapped the user data in a 'data' object
+          email: 'admin@example.com',
+          name: 'Admin User',
+          password: 'admin123',
+          role: 'admin',
+        }
       });
       console.log('Demo user created successfully in localStorage');
     } else {
