@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FarmProvider } from "./context/FarmContext";
 import { AuthProvider } from "./context/AuthContext";
-import { useEffect } from "react";
 import { startApiWorker } from "./api/apiHandlers";
 
 import Index from "./pages/Index";
@@ -25,7 +24,10 @@ const queryClient = new QueryClient();
 // Initialize MSW in development
 if (process.env.NODE_ENV !== 'production') {
   console.log('Initializing API mocking...');
-  startApiWorker();
+  // Start the worker with a delay to ensure everything else is loaded
+  setTimeout(() => {
+    startApiWorker();
+  }, 100);
 }
 
 const App = () => (

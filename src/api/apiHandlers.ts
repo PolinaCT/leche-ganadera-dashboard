@@ -68,27 +68,22 @@ export const startApiWorker = async () => {
   if (process.env.NODE_ENV !== 'production') {
     console.log('Starting MSW worker...');
     try {
-      // Ensure mockServiceWorker.js is available by directly creating it
-      await fetch('/mockServiceWorker.js')
-        .catch(() => {
-          console.warn('mockServiceWorker.js not available, using fallback mode');
-          return { ok: false };
-        });
-      
-      // Add a manual delay to ensure the worker has time to register
-      setTimeout(() => {
-        worker.start({
-          onUnhandledRequest: 'bypass', // To avoid logging unhandled requests
-          quiet: true, // Reduce console noise
-        })
-        .then(() => {
+      // Check if in a browser environment
+      if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+        try {
+          // Start without checking for the service worker file
+          await worker.start({
+            onUnhandledRequest: 'bypass',
+            quiet: true,
+          });
           console.log('API Mock Service Worker started successfully');
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Failed to start MSW worker:', error);
           console.log('Continuing in fallback mode without MSW');
-        });
-      }, 500);
+        }
+      } else {
+        console.log('Not in browser environment, skipping MSW setup');
+      }
     } catch (error) {
       console.error('Error setting up MSW worker:', error);
       console.log('Continuing in fallback mode without MSW');

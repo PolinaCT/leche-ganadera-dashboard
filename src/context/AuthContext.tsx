@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { loginUser, registerUser } from '@/api/authApi'; // Importamos las funciones directamente
 
 interface User {
   id: string;
@@ -40,18 +41,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       console.log('Login attempt with:', email);
       
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al iniciar sesión');
-      }
+      // Llamar directamente a la función de autenticación en lugar de usar fetch
+      // Esto nos permite evitar problemas con MSW y respuestas JSON inválidas
+      const userData = await loginUser(email, password);
       
-      const userData = await response.json();
+      // Si llegamos hasta aquí, la autenticación fue exitosa
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
@@ -70,16 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsLoading(true);
       
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar usuario');
-      }
+      // Llamar directamente a la función de registro en lugar de usar fetch
+      await registerUser(email, name, password);
 
       toast.success('Usuario registrado correctamente');
       navigate('/login');
