@@ -185,7 +185,7 @@ const RegisterForm = () => {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex flex-col space-y-4">
         <div className="text-center text-sm">
           ¿Ya tienes una cuenta?{" "}
           <Link to="/login" className="underline text-primary">
